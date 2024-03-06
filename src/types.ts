@@ -9,6 +9,7 @@ namespace Types {
         applicantCount: number,
         seniority: string,
         resumeLink: string,
+        coverLetterLink: string,
         resumeMatchScore: number,
         manuallyModified: boolean,
         email: string,

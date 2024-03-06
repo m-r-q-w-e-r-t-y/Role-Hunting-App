@@ -30,7 +30,7 @@ namespace Helper {
     for (const [_, value] of Object.entries(entry)) {
       row.push(value);
     }
-  
+
     sheet.appendRow(row);
   }
 
@@ -46,16 +46,54 @@ namespace Helper {
                               .matchCase(true)
                               .findAll()
                               .length;
-    const identifier = `+${company.toLowerCase().replace(" ", "") + count}`;
+    const companyEdit = company.toLowerCase().replace(" ", "").slice(0, 6);
+    const identifier = `+${companyEdit + count}`;
     
     return username + identifier + domain;
   }
 
+  // https://www.linkedin.com/jobs/collections/recommended/?currentJobId=3779358225
+  export function formatLinkedInLink(url: string): string {
+    return url.slice(0, url.indexOf("/?eBP="));
+  }
+
+  export function getIdFromUrl(url: string): string {
+    return url.match(/[-\w]{25,}/)[0];
+  }
+
+
   /**
    * Makes an API request to the PaLM API set in chat mode. It will recall previous queries.
    */
-  export function askBardText(input: string): any {
-    Logger.log(Training.TEXT);
-    return "";
+  export function askBardText(input: string, training: string): any {
+    const url = Env.API_URL + "?key=" + Env.API_KEY;
+
+    const requestBody = {
+      prompt: {
+        text: training + `input:${input}output`,
+      },
+      temperature: 0.7,
+      candidateCount: 1,
+      topK: 40,
+      topP: 0.95,
+      maxOutputTokens: 1024
+    };
+  
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      payload: JSON.stringify(requestBody),
+    };
+  
+    const response = JSON.parse(UrlFetchApp.fetch(url, options).getContentText());
+
+    try {
+      return response.candidates[0].output;
+    }
+    catch (error) {
+      return "";
+    }
   }
 }
